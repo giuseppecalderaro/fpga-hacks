@@ -66,7 +66,7 @@ sevenseg ssegctrl (
 vgactrl VGA_Controller (
 	.reset(buttons[0]),
 	.clk(clk),
-	.resolution(1'b0),
+	.resolution(switches[0]),
 	.hs(hs),
 	.vs(vs),
 	.hcount(hcount),
