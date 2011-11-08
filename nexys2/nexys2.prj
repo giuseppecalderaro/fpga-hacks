@@ -1,0 +1,5 @@
+verilog work toplevel.v
+verilog work dcm_test.v
+verilog work sevenseg.v
+verilog work modcounter.v
+verilog work vgactrl.v
