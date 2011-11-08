@@ -1,2 +1,8 @@
-Verilog modules for Digilent Nexys2 board
+low-latency:
+	exercises of low latency FPGA development:
+	1. MessageParsing:
+	   -> datapath.v needs improvements.
+	      Need to split synchronous part from sequential logic.
 
+nexys2:
+	Verilog modules for Digilent Nexys2 board
