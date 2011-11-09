@@ -1,7 +1,7 @@
 BOARD=Nexys2
 FPGA=xc3s500e-5-fg320
-PROJECT=nexys2
-TOPLEVEL_BLOCK=toplevel
+PROJECT=MessageParsing
+TOPLEVEL_BLOCK=main
 
 all: image.bit
 

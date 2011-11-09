@@ -1,0 +1,6 @@
+verilog work source/block1.v
+verilog work source/block2.v
+verilog work source/datapath.v
+verilog work source/fifo.v
+verilog work source/main.v
+verilog work source/testdp.v
