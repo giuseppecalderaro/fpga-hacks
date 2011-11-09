@@ -1,40 +1,46 @@
-all: synthesis part map place_route bitgen
+BOARD=Nexys2
+FPGA=xc3s500e-5-fg320
+PROJECT=nexys2
 
-synthesis:
+all: ${PROJECT}.bit
+
+${PROJECT}.ngc:
 	@echo -n "Synthesis..."
-	@echo "run -ifn nexys2.prj -ifmt mixed -ofn nexys2 -p xc3s500e-5-fg320 -opt_mode Speed -opt_level 1 -top toplevel" | xst &> log/xst.log
+	@echo "run -ifn ${PROJECT}.prj -ifmt mixed -ofn ${PROJECT} -p ${FPGA} -opt_mode Speed -opt_level 1 -top toplevel" | xst &> log/xst.log
 	@echo "done"
 
-part:
+${PROJECT}.ngd: ${PROJECT}.ngc
 	@echo -n "Partitioning..."
-	@ngdbuild -p xc3s500e-5-fg320 -uc constraints/nexys2.ucf nexys2.ngc &> log/ngdbuild.log
+	@ngdbuild -p ${FPGA} -uc constraints/${PROJECT}.ucf $< &> log/ngdbuild.log
 	@echo "done"
 
-map:
+${PROJECT}.ncd: ${PROJECT}.ngd
 	@echo -n "Mapping..."
-	@map -detail -pr b nexys2.ngd &> log/map.log
+	@map -detail -pr b $< &> log/map.log
 	@echo "done"
 
-place_route:
+parout.ncd: ${PROJECT}.ncd
 	@echo -n "Placing and routing..."
-	@par -w nexys2.ncd parout.ncd constraints/nexys2.pcf &> log/par.log
+	@par -w $< $@ constraints/${PROJECT}.pcf &> log/par.log
 	@echo "done"
 
-bitgen:
+image.bit: parout.ncd
 	@echo -n "Bitfile generation..."
-	@bitgen -w -g StartUpClk:JtagClk -g CRC:Enable parout.ncd nexys2.bit constraints/nexys2.pcf &> log/bitgen
+	@bitgen -w -g StartUpClk:JtagClk -g CRC:Enable $< $@ constraints/${PROJECT}.pcf &> log/bitgen.log
+	@mkdir -p bitfiles
+	@cp image.bit bitfiles/${PROJECT}.bit
 	@echo "done"
 
-program: all
-	@sudo djtgcfg prog -d Nexys2 -i 0 -f nexys2.bit 
+program: image.bit	
+	@sudo djtgcfg prog -d ${BOARD} -i 0 -f bitfiles/${PROJECT}.bit
 
 clean:
 	@echo -n "Cleaning..."
-	@rm -rf netlist.lst nexys2.bgn nexys2.bit nexys2_bitgen.xwbt nexys2.bld 	\
-		nexys2.drc nexys2.map nexys2.mrp nexys2.ncd nexys2.ngc nexys2.ngd 	\
-		nexys2_ngdbuild.xrpt nexys2.ngm nexys2.pcf nexys2_summary.xml		\
-		nexys2_usage.xml nexys2_xst.xrpt parout.ncd parout.pad parout_pad.csv	\
+	@rm -rf netlist.lst ${PROJECT}.bgn ${PROJECT}.bit ${PROJECT}_bitgen.xwbt ${PROJECT}.bld 	\
+		${PROJECT}.drc ${PROJECT}.map ${PROJECT}.mrp ${PROJECT}.ncd ${PROJECT}.ngc ${PROJECT}.ngd 	\
+		${PROJECT}_ngdbuild.xrpt ${PROJECT}.ngm ${PROJECT}.pcf ${PROJECT}_summary.xml		\
+		${PROJECT}_usage.xml ${PROJECT}_xst.xrpt parout.ncd parout.pad parout_pad.csv	\
 		parout_pad.txt parout.par parout.ptwx parout.unroutes parout.xpi	\
 		toplevel.lso toplevel_map.xrpt toplevel_par.xrpt webtalk.log		\
-		xlnx_auto_0_xdb _xmsgs xst log/*.log
+		xlnx_auto_0_xdb _xmsgs xst log/*.log bitfiles/ image*
 	@echo "done"
